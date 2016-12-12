@@ -1,6 +1,4 @@
-require_relative '../lib/txt2tags'
-require 'test/unit'
-require 'stringio'
+require_relative 'helper_test'
 
 class TestInputParameter < Test::Unit::TestCase
   def test_string
