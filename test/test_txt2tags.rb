@@ -12,7 +12,7 @@ class TestInputParameter < Test::Unit::TestCase
   end
 end
 
-class TestRuleComments < Test::Unit::TestCase
+class TestRuleComment < Test::Unit::TestCase
   def test_remove_comment
     assert_equal(
       "Without comment\nNo comments...",
@@ -26,7 +26,9 @@ class TestRuleComments < Test::Unit::TestCase
       Txt2Tags.new("Without comment\n %This isnt a Comment!\nNo comments...").html5
     )
   end
+end
 
+class TestInlineFormatModifiers <  Test::Unit::TestCase
   def test_html_output_monospace_rule
     assert_equal("<pre>monospace</pre>", Txt2Tags.new("``monospace``").html5)
   end
