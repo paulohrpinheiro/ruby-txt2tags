@@ -40,8 +40,10 @@ class Txt2Tags
   end
 
   def html5
-    self.apply_rules(:html5, self.sanitize).join
+    apply_rules(:html5, sanitize).join
   end
+
+  private
 
   def sanitize
     @input.readlines.select { |l| not l.start_with?('%') }
