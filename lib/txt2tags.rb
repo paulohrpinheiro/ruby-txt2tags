@@ -35,9 +35,12 @@ class Txt2Tags
         @@marks[m] = Regexp.new @@marks[m]
       end
 
+      @@compiled = true
+
+      @@compiled.freeze
       @@marks.freeze
       @@targets.freeze
-      @@compiled = true
+
     end
   end
 
