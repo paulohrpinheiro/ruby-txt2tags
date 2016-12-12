@@ -12,6 +12,10 @@ class Txt2Tags
   end
 
   def html
-    @input.read
+    self.sanitize.join
+  end
+
+  def sanitize()
+    @input.readlines.select { |l| not l.start_with?('%') }
   end
 end
