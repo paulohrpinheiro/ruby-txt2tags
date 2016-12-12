@@ -2,20 +2,32 @@ require 'stringio'
 
 class Txt2Tags
   @@marks = {
+    # Beautifiers
     :monospace => '``(.*?)``',
     :bold => '\*\*(.*?)\*\*',
     :italic => '//(.*?)//',
     :underline => '__(.*?)__',
     :strike => '--(.*?)--',
+
+    # Titles
+    :title1 => '\A= (.*?) =',
+    :title2 => '\A== (.*?) ==',
+    :title3 => '\A=== (.*?) ===',
   }
 
   @@targets = {
     :html5 => {
+      # Beautifiers
       :monospace => '<pre>\1</pre>',
       :bold => '<strong>\1</strong>',
       :italic => '<em>\1</em>',
       :underline => '<span style="text-decoration: underline;">\1</span>',
       :strike => '<span style="text-decoration: line-through;">\1</span>',
+
+      # Titles
+      :title1 => '<h2>\1</h2>',
+      :title2 => '<h3>\1</h3>',
+      :title3 => '<h4>\1</h4>',
     }
   }
 
