@@ -33,6 +33,14 @@ class Txt2Tags
 
   @@compiled = false
 
+  def self.marks_content
+    @@marks
+  end
+
+  def self.targets_content
+    @@targets
+  end
+
   def initialize(input)
     if input.respond_to?(:read)
       @input = input
