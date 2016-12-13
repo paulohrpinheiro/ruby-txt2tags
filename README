@@ -1,0 +1,104 @@
+# Txt2Tags in Ruby
+
+Txt2Tags is a document generator. It reads a text file with minimal markup such as \*\*bold\*\* and //italic// and converts it to some formats, like *HTML* or *LaTeX*.
+
+This is a reimplementation in Ruby because the original is written in Python:
+
+  http://txt2tags.org/
+
+
+This project is starting. For now, only the "beautification" tags are ready, and only html5 output.
+
+For a better understanding of the specification of this format, see this document:
+
+  http://txt2tags.org/markup.html
+
+
+# Usage
+
+```ruby
+% irb
+2.3.0 :001 > require_relative 'txt2tags'
+=> true
+2.3.0 :002 > puts Txt2Tags.new("//italic//").html5
+<em>italic</em>
+=> nil
+```
+
+
+## Implemented tags
+
+### Comments
+
+Lines beggining with `%` will be ignored.
+
+
+### Beautifiers
+
+* \`\`monospace\`\`
+* `\*\*bold\*\*
+* //italic//
+* \_\_underline\_\_
+* --strike--
+
+
+### Titles
+
+* = Title 1 =
+
+* == Title 2 ==
+
+* === Title 3 ===
+
+
+# Sample
+
+Input:
+```
+= Sample Document =
+
+== Marks ==
+
+% a comment!!!
+
+=== Beautifiers ===
+
+\``monospace``
+**bold**
+//italic//
+__underline__
+--strike--
+
+
+Titles is in example.
+```
+
+Output:
+```
+<h2>Sample Document</h2>
+
+<h3>Marks</h3>
+
+
+<h4>Beautifiers</h4>
+
+<pre>monospace</pre>
+<strong>bold</strong>
+<em>italic</em>
+<span style="text-decoration: underline;">underline</span>
+<span style="text-decoration: line-through;">strike</span>
+
+
+Titles is in example.
+```
+
+Save the input as 'input.t2t' and do in `irb`:
+
+```
+% irb
+2.3.0 :001 > require_relative 'txt2tags'
+ => true
+2.3.0 :002 > Txt2Tags.new(File::open('input.t2t')).html5
+ => "<h2>Sample Document</h2>\n\n<h3>Marks</h3>\n\n\n<h4>Beautifiers</h4>\n\n\\<pre>monospace</pre>\n<strong>bold</strong>\n<em>italic</em>\n<span style=\"text-decoration: underline;\">underline</span>\n<span style=\"text-decoration: line-through;\">strike</span>                                                                                                                                                                \n\n\nTitles is in example.\n\n"
+2.3.0 :003 > 
+```
