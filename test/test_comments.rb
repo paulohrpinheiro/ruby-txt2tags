@@ -10,8 +10,8 @@ class TestComments < Test::Unit::TestCase
 
   def test_mantain_line_with_percente_simbol_not_in_line_begin
     assert_equal(
-      "Without comment\n %This isnt a Comment!\nNo comments...",
-      Txt2Tags.new("Without comment\n %This isnt a Comment!\nNo comments...").html5
+      "Without comment\nThis % isnt a Comment!\nNo comments...",
+      Txt2Tags.new("Without comment\nThis % isnt a Comment!\nNo comments...").html5
     )
   end
 end
