@@ -63,7 +63,7 @@ Input:
 
 === Beautifiers ===
 
-\``monospace``
+``monospace``
 **bold**
 //italic//
 __underline__
@@ -100,5 +100,13 @@ Save the input as 'input.t2t' and do in `irb`:
  => true
 2.3.0 :002 > Txt2Tags.new(File::open('input.t2t')).html5
  => "<h2>Sample Document</h2>\n\n<h3>Marks</h3>\n\n\n<h4>Beautifiers</h4>\n\n\\<pre>monospace</pre>\n<strong>bold</strong>\n<em>italic</em>\n<span style=\"text-decoration: underline;\">underline</span>\n<span style=\"text-decoration: line-through;\">strike</span>                                                                                                                                                                \n\n\nTitles is in example.\n\n"
-2.3.0 :003 > 
+2.3.0 :003 >
 ```
+
+Or, with command `txt2tags`:
+
+```bash
+txt2tags --input input.t2t
+```
+
+See the options with `txt2tags --help`.
