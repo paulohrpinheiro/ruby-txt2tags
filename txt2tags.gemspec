@@ -11,6 +11,6 @@ Gem::Specification.new do |s|
 
   s.executables << 'txt2tags-rb'
 
-  s.add_runtime_dependency "htmlentities", ["~> 4.3"]
-  s.add_dev
+  s.add_runtime_dependency 'htmlentities', ['~> 4.3']
+  s.add_development_dependency 'rake', ['~> 0']
 end
