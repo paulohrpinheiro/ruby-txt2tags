@@ -76,7 +76,7 @@ class Txt2Tags
 
     return if @@compiled
 
-    compile_regexp
+    compile_regexp!
     @@compiled = true
 
     @@compiled.freeze
@@ -90,17 +90,14 @@ class Txt2Tags
 
   private
 
-  def compile_regexp
+  def compile_regexp!
     @@marks.keys.each do |m|
-      case @@marks[m][:type]
-      when :inline, :title
+      if [:inline, :title].include?(@@marks[m][:type])
         @@marks[m][:regexp] = Regexp.new @@marks[m][:regexp]
-      when :block
+      else
         [:begin, :end].each do |t|
           @@marks[m][:regexp][t] = Regexp.new @@marks[m][:regexp][t]
         end
-      else
-        raise "Mark type [#{@@marks[m][:type]}] not recognized."
       end
     end
   end
@@ -126,26 +123,22 @@ class Txt2Tags
           end
         else
           @@marks.keys.select { |k| @@marks[k][:type] == :block }.each do |m|
-            if line.match(@@marks[m][:regexp][:begin])
-              in_block = true
-              ignore_current_line = @@marks[m][:ignore_match_line]
-              close_ignore_current_line = ignore_current_line
-              apply_inline = @@marks[m][:apply_inline]
-              close_block = @@targets[format][m][:end]
-              close_block_re = @@marks[m][:regexp][:end]
+            next unless line.match(@@marks[m][:regexp][:begin])
 
-              y.yield @@targets[format][m][:begin]
-            end
+            in_block = true
+            ignore_current_line = @@marks[m][:ignore_match_line]
+            close_ignore_current_line = ignore_current_line
+            apply_inline = @@marks[m][:apply_inline]
+            close_block = @@targets[format][m][:end]
+            close_block_re = @@marks[m][:regexp][:end]
+
+            y.yield @@targets[format][m][:begin]
           end
         end
 
         if !ignore_current_line
-          @@marks
-            .keys
-            .select { |k| (apply_inline && @@marks[k][:type] == :inline) || (apply_title && @@marks[k][:type] == :title) }
-            .each do |m|
-            line.gsub!(@@marks[m][:regexp], @@targets[format][m])
-          end
+          apply_single_marks!(:inline, format, line) if apply_inline
+          apply_single_marks!(:title, format, line) if apply_title
 
           y.yield line
         else
@@ -154,6 +147,12 @@ class Txt2Tags
       end
 
       y.yield close_block if in_block
+    end
+  end
+
+  def apply_single_marks!(mark, format, line)
+    @@marks.keys.select { |k| @@marks[k][:type] == mark }.each do |m|
+      line.gsub!(@@marks[m][:regexp], @@targets[format][m])
     end
   end
 end
