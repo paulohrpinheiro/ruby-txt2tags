@@ -14,6 +14,7 @@ For a better understanding of the specification of this format, see this documen
   http://txt2tags.org/markup.html
 
 
+
 ## Implemented tags
 
 ### Comments
@@ -94,6 +95,7 @@ i_italic_i
  => "//italic"
 ```
 
+
 ### More **IRB**
 
 ```ruby
@@ -115,3 +117,7 @@ i_italic_i
 i_italic_i
  => ["html5", "null"]
 ```
+
+## RubyGems
+
+https://rubygems.org/gems/txt2tags
