@@ -1,5 +1,8 @@
 # Txt2Tags in Ruby
 
+[![Gem Version](https://badge.fury.io/rb/txt2tags.svg)](https://badge.fury.io/rb/txt2tags)
+
+
 Txt2Tags is a document generator. It reads a text file with minimal markup such as \*\*bold\*\* and //italic// and converts it to some formats, like *HTML* or *LaTeX*.
 
 This is a reimplementation in Ruby because the original is written in Python:
