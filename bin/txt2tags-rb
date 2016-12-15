@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
-require_relative '../lib/txt2tags'
+require 'txt2tags'
 
 options = {}
 
@@ -22,9 +22,24 @@ optparse = OptionParser.new do |opts|
     puts opts
     exit
   end
+
+  opts.on('-l', '--list', 'List available formats') do
+    puts Txt2Tags.new('').formats.join(' ')
+    exit
+  end
+
+  options[:format] = nil
+  opts.on('-f', '--format FORMAT', 'Use this format for output') do |format|
+    txt2tags = Txt2Tags.new('')
+    abort('Unknown format') unless txt2tags.formats.include?(format)
+    require_relative "../lib/txt2tags/#{format}"
+    options[:format] = Object.const_get(format.capitalize)
+  end
 end
 
 optparse.parse!
+
+abort('Please, the format (-f/--format option)!') if options[:format].nil?
 
 input = STDIN unless options[:input]
 input = File.open(options[:input], 'r') if options[:input]
@@ -32,4 +47,4 @@ input = File.open(options[:input], 'r') if options[:input]
 output = STDOUT unless options[:output]
 output = File.open(options[:output], 'w') if options[:output]
 
-output.write Txt2Tags.new(input).html5
+output.write Txt2Tags.new(input).output(options[:format]).to_a.join

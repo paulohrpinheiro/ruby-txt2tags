@@ -1,12 +1,19 @@
 require_relative 'helper_test'
 
+# Verify if all marks in class are implement in target drivers
 class TestTarget < Test::Unit::TestCase
   def test_has_all_marks
-    txt2tags = Txt2Tags.new ''
-    all_marks = txt2tags.marks.keys.sort
-    txt2tags.targets.keys.each do |t|
-      assert_equal(all_marks, txt2tags.targets[t].keys.sort,
-       "#{t} does not contain all the marks.")
+    txt2tags = Txt2Tags.new('')
+
+    [:BEAUTIFIERS, :TITLES, :BLOCKS].each do |type|
+      must_have = Txt2Tags.const_get(type).keys.sort
+
+      txt2tags.formats.each do |file|
+        driver = txt2tags.load_format(file)
+
+        assert_equal must_have, driver.const_get(type).keys.sort,
+                     "#{driver} does not contain all the #{type} marks."
+      end
     end
   end
 end

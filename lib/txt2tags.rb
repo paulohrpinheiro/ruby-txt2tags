@@ -2,8 +2,53 @@ require 'stringio'
 
 # TXT2Tags - Converts t2t files to another formats
 class Txt2Tags
-  attr_reader :marks, :targets
+  attr_reader :BEAUTIFIERS, :TITLES, :BLOCKS
 
+  # The basic transformations
+  #
+  # One regexp by mark, the content must be in a group: (.*?)
+  BEAUTIFIERS = {
+    monospace: Regexp.new('``(.*?)``'),
+    bold: Regexp.new('\*\*(.*?)\*\*'),
+    italic: Regexp.new('//(.*?)//'),
+    underline: Regexp.new('__(.*?)__'),
+    strike: Regexp.new('--(.*?)--')
+  }.freeze
+
+  # Only one linners transformations
+  #
+  # One regexp by mark, the content must be in a group: (.*?)
+  TITLES = {
+    title1: Regexp.new('\A= (.*?) ='),
+    title2: Regexp.new('\A== (.*?) =='),
+    title3: Regexp.new('\A=== (.*?) ===')
+  }.freeze
+
+  # Define blocks os lines transformation
+  #
+  # - begin_re          -> identify the begin of a blocks
+  # - end_re            -> identify the end of a blocks
+  # - apply_inline      -> can apply the BEAUTIFIERS and TITLES transformations?
+  # - strip             -> can strip spaces from line begin?
+  # - ignore_match_line -> begin and end lines will be discarded?
+  BLOCKS = {
+    quote: {
+      begin_re: Regexp.new('\A\s+'),
+      end_re: Regexp.new('\A\Z'),
+      apply_inline: true,
+      strip: true,
+      ignore_match_line: false
+    },
+    verbatim: {
+      begin_re: Regexp.new('\A```\Z'),
+      end_re: Regexp.new('\A```\Z'),
+      apply_inline: false,
+      strip: false,
+      ignore_match_line: true
+    }
+  }.freeze
+
+  # Save input type
   def initialize(input)
     if input.respond_to?(:read)
       @input = input
@@ -12,119 +57,104 @@ class Txt2Tags
     else
       raise 'Cannot read this.'
     end
-
-    @targets = {
-      html5: {
-        # Beautifiers
-        monospace: '<pre>\1</pre>',
-        bold: '<strong>\1</strong>',
-        italic: '<em>\1</em>',
-        underline: '<span style="text-decoration: underline;">\1</span>',
-        strike: '<span style="text-decoration: line-through;">\1</span>',
-
-        # Titles
-        title1: '<h2>\1</h2>',
-        title2: '<h3>\1</h3>',
-        title3: '<h4>\1</h4>',
-
-        # Blocks
-        quote: { begin: "<blockquote>\n", end: "</blockquote>\n" },
-        verbatim: { begin: "<pre>\n", end: "</pre>\n" }
-      }
-    }
-
-    @marks = {
-      # Beautifiers
-      monospace: { type: :inline, regexp: Regexp.new('``(.*?)``') },
-      bold: { type: :inline, regexp: Regexp.new('\*\*(.*?)\*\*') },
-      italic: { type: :inline, regexp: Regexp.new('//(.*?)//') },
-      underline: { type: :inline, regexp: Regexp.new('__(.*?)__') },
-      strike: { type: :inline, regexp: Regexp.new('--(.*?)--') },
-
-      # Titles
-      title1: { type: :title, regexp: Regexp.new('\A= (.*?) =') },
-      title2: { type: :title, regexp: Regexp.new('\A== (.*?) ==') },
-      title3: { type: :title, regexp: Regexp.new('\A=== (.*?) ===') },
-
-      # Blocks
-      quote: {
-        type: :block,
-        regexp: {
-          begin: Regexp.new('\A[ \t]+'),
-          end: Regexp.new('\A\s*\Z')
-        },
-        apply_inline: true,
-        ignore_match_line: false
-      },
-      verbatim: {
-        type: :block,
-        regexp: {
-          begin: Regexp.new('\A```\Z'),
-          end: Regexp.new('\A```\Z')
-        },
-        apply_inline: true,
-        ignore_match_line: true
-      }
-    }
   end
 
-  def html5
-    apply_rules(:html5).to_a.join
-  end
-
-  private
-
-  def apply_rules(format)
-    in_block = false
-    apply_inline = true
-    apply_title = true
-    close_block = nil
-    close_block_re = nil
-    ignore_current_line = false
-    close_ignore_current_line = false
+  # Process conform 'format' and return a iterator with processed input
+  def output(format)
+    block = nil
+    ignore_line = false
 
     Enumerator.new do |y|
-      @input.readlines.reject { |l| l.start_with?('%') }.each do |line|
-        if in_block
-          if line.match(close_block_re)
-            in_block = false
-            apply_inline = true
-
-            ignore_current_line = close_ignore_current_line
-            y.yield close_block
-          end
-        else
-          @marks.keys.select { |k| @marks[k][:type] == :block }.each do |m|
-            next unless line.match(@marks[m][:regexp][:begin])
-
-            in_block = true
-            ignore_current_line = @marks[m][:ignore_match_line]
-            close_ignore_current_line = ignore_current_line
-            apply_inline = @marks[m][:apply_inline]
-            close_block = @targets[format][m][:end]
-            close_block_re = @marks[m][:regexp][:end]
-
-            y.yield @targets[format][m][:begin]
-          end
-        end
-
-        if !ignore_current_line
-          apply_single_marks!(:inline, format, line) if apply_inline
-          apply_single_marks!(:title, format, line) if apply_title
-
-          y.yield line
-        else
-          ignore_current_line = false
-        end
+      # We can this multiples times
+      begin
+        @input.rewind
+      rescue Errno::ESPIPE
       end
 
-      y.yield close_block if in_block
+      # Comments are discarded (lines beginnig with %)
+      @input.readlines.reject { |l| l.start_with?('%') }.each do |line|
+        # right space are discarded (line terminators, tabs and spaces)
+        line.rstrip!
+
+        # We are already inside a block?
+        if !block.nil?
+          # We find the end of a block?
+          if BLOCKS[block][:end_re].match line
+            # Send the end mark for this format
+            y.yield format::BLOCKS[block][:end]
+
+            # We can ignore the actual line?
+            if BLOCKS[block][:ignore_match_line]
+              block = nil
+              next
+            end
+          end
+        else
+          # Searching for a new block...
+          BLOCKS.keys.each do |m|
+            # No...
+            next unless BLOCKS[m][:begin_re].match line
+
+            # Yes!
+            block = m
+            # We can ignore the actual line?
+            ignore_line = BLOCKS[block][:ignore_match_line]
+
+            # Send the begin mark for this format
+            y.yield format::BLOCKS[block][:begin]
+
+            # We already figured out what to do, we do not have to keep looking
+            break
+          end
+        end
+
+        # Ignore this line? The others we'll find out.
+        if ignore_line
+          # The next line we still do not know if we ignore
+          ignore_line = false
+          next
+        end
+
+        # We can strip spaces from the begin of this line?
+        line.strip! if !block.nil? && BLOCKS[block][:strip]
+
+        # an apply the BEAUTIFIERS and TITLES transformations?
+        if block.nil? || (!block.nil? && BLOCKS[block][:apply_inline])
+          apply_marks!(format, line)
+        end
+
+        # More on line!
+        y.yield line
+      end
+
+      # There are a close block pending?
+      y.yield format::BLOCKS[block][:end] unless block.nil?
     end
   end
 
-  def apply_single_marks!(mark, format, line)
-    @marks.keys.select { |k| @marks[k][:type] == mark }.each do |m|
-      line.gsub!(@marks[m][:regexp], @targets[format][m])
+  # Apply the basic conversions (no BLOCKS) to a line
+  def apply_marks!(conversion, line)
+    [:BEAUTIFIERS, :TITLES].each do |type|
+      type_array = Txt2Tags.const_get(type)
+      type_array.keys.each do |rule|
+        line.gsub!(type_array[rule], conversion.const_get(type)[rule])
+      end
     end
+  end
+
+  # Discover available formats
+  def formats
+    format_list = []
+    Dir[File.join(__dir__, 'txt2tags', '*.rb')].each do |format|
+      format_list.push File.basename(format, '.rb')
+    end
+
+    format_list
+  end
+
+  # Require the format using a string as reference
+  def load_format(name)
+    require "txt2tags/#{name}"
+    Object.const_get(File.basename(name, '.rb').capitalize!)
   end
 end

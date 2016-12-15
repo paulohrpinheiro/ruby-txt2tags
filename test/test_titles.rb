@@ -1,15 +1,16 @@
 require_relative 'helper_test'
 
-class TestTitles  < Test::Unit::TestCase
+# Test formating titles
+class TestTitles < NullFormatHelper
   def test_html_output_title1_rule
-    assert_equal("<h2>Title 1</h2>", Txt2Tags.new("= Title 1 =").html5)
+    assert_equal 'T1_Title 1_T1', output('= Title 1 =')
   end
 
   def test_html_output_title2_rule
-    assert_equal("<h3>Title 2</h3>", Txt2Tags.new("== Title 2 ==").html5)
+    assert_equal 'T2_Title 2_T2', output('== Title 2 ==')
   end
 
   def test_html_output_title3_rule
-    assert_equal("<h4>Title 3</h4>", Txt2Tags.new("=== Title 3 ===").html5)
+    assert_equal 'T3_Title 3_T3', output('=== Title 3 ===')
   end
 end

@@ -1,11 +1,12 @@
 require_relative 'helper_test'
 
-class TestInputParameter < Test::Unit::TestCase
+# Null format driverr - a template for new drivers
+class TestInputParameter < NullFormatHelper
   def test_string
-    assert_equal("string input", Txt2Tags.new("string input").html5)
+    assert_equal 'string input', output('string input')
   end
 
   def test_file
-    assert_equal("file input", Txt2Tags.new(StringIO.new("file input")).html5)
+    assert_equal 'file input', output(StringIO.new('file input'))
   end
 end
