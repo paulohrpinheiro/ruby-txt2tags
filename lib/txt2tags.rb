@@ -13,7 +13,7 @@ class Txt2Tags
     italic: Regexp.new('//(.*?)//'),
     underline: Regexp.new('__(.*?)__'),
     strike: Regexp.new('--(.*?)--'),
-    link: Regexp.new('\[(.*?)\]\((.*?)\)')
+    link: Regexp.new('\[(.*)\s+(.*?)\]'),
   }.freeze
 
   # Only one linners transformations

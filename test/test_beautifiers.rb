@@ -24,7 +24,7 @@ class TestBeautifiers < NullFormatHelper
 
   def test_html_output_link_rule
     assert_equal\
-      'L_https://www.ruby-lang.org||Ruby Site_L',
-      output('[https://www.ruby-lang.org](Ruby Site)')
+      'L_Ruby Site||https://www.ruby-lang.org_L',
+      output('[Ruby Site https://www.ruby-lang.org]')
   end
 end
