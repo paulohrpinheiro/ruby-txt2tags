@@ -21,4 +21,10 @@ class TestBeautifiers < NullFormatHelper
   def test_html_output_strike_rule
     assert_equal 's_strike_s', output('--strike--')
   end
+
+  def test_html_output_link_rule
+    assert_equal\
+      'L_https://www.ruby-lang.org||Ruby Site_L',
+      output('[https://www.ruby-lang.org](Ruby Site)')
+  end
 end

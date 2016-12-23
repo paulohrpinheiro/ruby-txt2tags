@@ -7,7 +7,8 @@ class Html5
     bold: '<strong>\1</strong>',
     italic: '<em>\1</em>',
     underline: '<span style="text-decoration: underline;">\1</span>',
-    strike: '<span style="text-decoration: line-through;">\1</span>'
+    strike: '<span style="text-decoration: line-through;">\1</span>',
+    link: '<a href="\1">\2</a>'
   }.freeze
 
   TITLES = {

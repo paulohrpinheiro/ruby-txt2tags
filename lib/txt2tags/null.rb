@@ -13,7 +13,8 @@ class Null
     bold: 'b_\1_b',
     italic: 'i_\1_i',
     underline: 'u_\1_u',
-    strike: 's_\1_s'
+    strike: 's_\1_s',
+    link: 'L_\1||\2_L'
   }.freeze
 
   TITLES = {
