@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'txt2tags'
-  s.version     = '0.0.1'
+  s.version     = '0.0.2'
   s.summary     = 'Ruby txt2tags implementation.'
   s.description = 'Converts a text file with minimal markup to various formats'
   s.authors     = ['Paulo Henrique Rodrigues Pinheiro']
@@ -10,6 +10,8 @@ Gem::Specification.new do |s|
   s.license     = 'MIT'
 
   s.executables << 'txt2tags-rb'
+
+  s.required_ruby_version = '>= 2.0'
 
   s.add_runtime_dependency 'htmlentities', ['~> 4.3']
   s.add_development_dependency 'rake', ['~> 0']
