@@ -64,67 +64,44 @@ class Txt2Tags
     block = nil
     ignore_line = false
 
-    Enumerator.new do |y|
-      # We can this multiples times
-      begin
-        @input.rewind
-      rescue Errno::ESPIPE
-      end
+    # We can this multiples times
+    @input.rewind if @input.eof?
 
+    Enumerator.new do |y|
       # Comments are discarded (lines beginnig with %)
       @input.readlines.reject { |l| l.start_with?('%') }.each do |line|
         # right space are discarded (line terminators, tabs and spaces)
         line.rstrip!
 
-        # We are already inside a block?
-        if !block.nil?
-          # We find the end of a block?
-          if BLOCKS[block][:end_re].match line
-            # Send the end mark for this format
-            y.yield format::BLOCKS[block][:end]
-
-            # We can ignore the actual line?
-            if BLOCKS[block][:ignore_match_line]
-              block = nil
-              next
-            end
-          end
-        else
+        if block.nil?
           # Searching for a new block...
-          BLOCKS.keys.each do |m|
-            # No...
-            next unless BLOCKS[m][:begin_re].match line
+          block = BLOCKS.find { |b| b[1][:begin_re].match line }
 
-            # Yes!
-            block = m
+          # The begin of a block!
+          unless block.nil?
+            block = block[0]
+
             # We can ignore the actual line?
             ignore_line = BLOCKS[block][:ignore_match_line]
 
             # Send the begin mark for this format
             y.yield format::BLOCKS[block][:begin]
+          end
+        elsif BLOCKS[block][:end_re].match line
+          # We find the end of a block!
+          # Send the end mark for this format
+          y.yield format::BLOCKS[block][:end]
 
-            # We already figured out what to do, we do not have to keep looking
-            break
+          # We can ignore the actual line?
+          if BLOCKS[block][:ignore_match_line]
+            block = nil
+            next
           end
         end
 
-        # Ignore this line? The others we'll find out.
-        if ignore_line
-          # The next line we still do not know if we ignore
-          ignore_line = false
-          next
-        end
-
-        # We can strip spaces from the begin of this line?
-        line.strip! if !block.nil? && BLOCKS[block][:strip]
-
-        # an apply the BEAUTIFIERS and TITLES transformations?
-        if block.nil? || (!block.nil? && BLOCKS[block][:apply_inline])
-          apply_marks!(format, line)
-        end
-
         # More on line!
-        y.yield line
+        y.yield process_line(line, block, format) unless ignore_line
+        ignore_line = false if ignore_line
       end
 
       # There are a close block pending?
@@ -132,14 +109,28 @@ class Txt2Tags
     end
   end
 
-  # Apply the basic conversions (no BLOCKS) to a line
-  def apply_marks!(conversion, line)
-    [:BEAUTIFIERS, :TITLES].each do |type|
-      type_array = Txt2Tags.const_get(type)
-      type_array.keys.each do |rule|
-        line.gsub!(type_array[rule], conversion.const_get(type)[rule])
+  def process_line(line, block, format)
+    # We can strip spaces from the begin of this line?
+    processed = line
+    processed.strip! if !block.nil? && BLOCKS[block][:strip]
+
+    apply(processed, block, format)
+  end
+
+  def apply(line, block, format)
+    processed = line
+
+    # an apply the BEAUTIFIERS and TITLES transformations?
+    if block.nil? || (!block.nil? && BLOCKS[block][:apply_inline])
+      [:BEAUTIFIERS, :TITLES].each do |type|
+        type_array = Txt2Tags.const_get(type)
+        type_array.keys.each do |rule|
+          processed.gsub!(type_array[rule], format.const_get(type)[rule])
+        end
       end
     end
+
+    processed
   end
 
   # Discover available formats
