@@ -27,4 +27,10 @@ class TestBeautifiers < NullFormatHelper
       'L_Ruby Site||https://www.ruby-lang.org_L',
       output('[Ruby Site https://www.ruby-lang.org]')
   end
+
+  def test_html_output_image_rule
+    assert_equal\
+      'I_http://pudim.com.br/pudim.jpg_I',
+      output('[http://pudim.com.br/pudim.jpg]')
+  end
 end

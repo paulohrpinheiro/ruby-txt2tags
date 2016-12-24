@@ -6,7 +6,7 @@ require_relative '../txt2tags'
 # Copy and paste this file for a new format.
 #
 # This contain the replace part of a regexp
-# "\1" is the group from the search part og regexps in main class
+# "\1" and "\2" are the groups from the search part og regexps in main class
 class Null
   BEAUTIFIERS = {
     monospace: 'm_\1_m',
@@ -14,7 +14,8 @@ class Null
     italic: 'i_\1_i',
     underline: 'u_\1_u',
     strike: 's_\1_s',
-    link: 'L_\1||\2_L'
+    link: 'L_\1||\2_L',
+    image: 'I_\1_I'
   }.freeze
 
   TITLES = {
