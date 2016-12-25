@@ -8,13 +8,13 @@ class Txt2Tags
   #
   # One regexp by mark, the content must be in a group: (.*?)
   BEAUTIFIERS = {
-    link: Regexp.new('\[(.*)\s+(.*?)\]'),
-    image: Regexp.new('\[(\S+)\]'),
     monospace: Regexp.new('``(.*?)``'),
     bold: Regexp.new('\*\*(.*?)\*\*'),
-    italic: Regexp.new('//(.*?)//'),
+    italic: Regexp.new('//([^\]\[]*?)//'),
     underline: Regexp.new('__(.*?)__'),
     strike: Regexp.new('--(.*?)--'),
+    link: Regexp.new('\[([^\]\[]*?)\s+([^\s\[\]]*?)\]'),
+    image: Regexp.new('\[([^\s\]\[]*?)\]')
   }.freeze
 
   # Only one linners transformations
