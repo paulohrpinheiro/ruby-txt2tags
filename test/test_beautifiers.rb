@@ -36,7 +36,7 @@ class TestBeautifiers < NullFormatHelper
 
   def test_html_output_link_and_image_rules
     assert_equal\
-    "L_This is a link||https://abc.xyz_LI_https://abc.xyz/img/g-icon.jpg_I",
-    output('[This is a link https://abc.xyz][https://abc.xyz/img/g-icon.jpg]')
+      'L_This is a link||https://abc.xyz_LI_https://abc.xyz/img/g-icon.jpg_I',
+      output('[This is a link https://abc.xyz][https://abc.xyz/img/g-icon.jpg]')
   end
 end
