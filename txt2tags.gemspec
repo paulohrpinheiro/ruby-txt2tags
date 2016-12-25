@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'txt2tags'
-  s.version     = '0.0.2'
+  s.version     = '0.1.0'
   s.summary     = 'Ruby txt2tags implementation.'
   s.description = 'Converts a text file with minimal markup to various formats'
   s.authors     = ['Paulo Henrique Rodrigues Pinheiro']
