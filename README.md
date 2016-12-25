@@ -57,6 +57,18 @@ Lines beggining with `%` will be ignored.
     ```
 
 
+### Images
+
+    [URL]
+    [https://paulohrpinheiro.xyz/favicon.ico]
+
+
+### Links
+
+    [A description of link THE_URL]
+    [My personal blog in pt-BR https://paulohrpinheiro.xyz]
+
+
 ## Usage
 
 ### Command line:
